@@ -1,0 +1,9 @@
+mobile/
+functions/
+shared/
+scripts/
+*.md
+firebase.json
+firestore.*
+.firebaserc
+
