@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Scaneat",
+    "slug": "scaneat",
     "version": "1.0.0",
+    "description": "Food Barcode Scanner & Health Analyzer",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,10 +17,14 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.scaneat.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "CAMERA"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
