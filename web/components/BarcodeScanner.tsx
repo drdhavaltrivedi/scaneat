@@ -213,7 +213,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
 
       if (videoRef.current) {
         codeReader.decodeFromVideoDevice(
-          selectedDeviceId,
+          selectedDeviceId || null,
           videoRef.current,
           (result, error) => {
             if (result) {

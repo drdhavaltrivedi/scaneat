@@ -3,7 +3,7 @@
  * No backend needed - runs directly in the browser
  */
 
-import { Product } from '../../../shared/types/product';
+import { Product } from '../../shared/types/product';
 
 interface HealthReason {
   type: 'positive' | 'negative' | 'warning';
