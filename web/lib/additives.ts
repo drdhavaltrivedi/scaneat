@@ -11,6 +11,7 @@ export interface AdditiveInfo {
   description: string;
   healthEffects: string[];
   whyAvoid: string[];
+  benefits?: string[];
   alternatives?: string;
 }
 
@@ -370,6 +371,398 @@ export const ADDITIVES_DATABASE: Record<string, AdditiveInfo> = {
       'Better alternatives available'
     ],
     alternatives: 'Choose fresh, unprocessed meats'
+  },
+  'E150D': {
+    code: 'E150D',
+    name: 'Caramel Color IV (Ammonia Sulfite Process)',
+    category: 'Artificial Color',
+    concern: 'moderate',
+    description: 'Caramel coloring made using ammonia and sulfites. May contain compounds of concern.',
+    healthEffects: [
+      'May contain 4-methylimidazole (4-MEI)',
+      'Potential carcinogenic compounds',
+      'May cause allergic reactions in sulfite-sensitive individuals',
+      'Linked to hyperactivity in some studies'
+    ],
+    whyAvoid: [
+      'Contains potentially harmful compounds',
+      'Sulfite sensitivity risk',
+      'No nutritional value',
+      'Purely for appearance',
+      'Better alternatives available'
+    ],
+    alternatives: 'Choose products with natural coloring or caramel made without ammonia'
+  },
+  'E170': {
+    code: 'E170',
+    name: 'Calcium Carbonate',
+    category: 'Acidity Regulator / Color',
+    concern: 'low',
+    description: 'Natural mineral compound used as an acidity regulator and white colorant. Generally safe.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'Source of calcium',
+      'May help with bone health',
+      'Rare digestive issues in high amounts'
+    ],
+    whyAvoid: [
+      'No significant concerns for most people',
+      'May cause constipation in excessive amounts',
+      'Can interfere with iron absorption if taken with meals'
+    ],
+    benefits: [
+      'Provides calcium',
+      'Natural mineral',
+      'Generally safe'
+    ],
+    alternatives: 'No need to avoid - generally safe additive'
+  },
+  'E412': {
+    code: 'E412',
+    name: 'Guar Gum',
+    category: 'Thickener / Stabilizer',
+    concern: 'low',
+    description: 'Natural thickener derived from guar beans. Generally safe and may have health benefits.',
+    healthEffects: [
+      'May help lower cholesterol',
+      'Can aid digestion',
+      'May help with blood sugar control',
+      'Generally well-tolerated',
+      'Rare digestive issues in high amounts'
+    ],
+    whyAvoid: [
+      'May cause bloating in sensitive individuals',
+      'Can interfere with nutrient absorption in very high doses',
+      'May cause digestive discomfort if consumed in excess'
+    ],
+    benefits: [
+      'Natural plant-based thickener',
+      'May have health benefits',
+      'Generally safe'
+    ],
+    alternatives: 'No need to avoid - natural and generally safe'
+  },
+  'E451': {
+    code: 'E451',
+    name: 'Triphosphates',
+    category: 'Emulsifier / Stabilizer',
+    concern: 'moderate',
+    description: 'Phosphate compounds used as emulsifiers and stabilizers. High phosphate intake may be concerning.',
+    healthEffects: [
+      'High phosphate intake may affect bone health',
+      'May contribute to cardiovascular issues',
+      'Can interfere with mineral absorption',
+      'May affect kidney function in sensitive individuals'
+    ],
+    whyAvoid: [
+      'High phosphate intake concerns',
+      'May affect bone density',
+      'Can interfere with calcium absorption',
+      'Better to limit processed foods with phosphates'
+    ],
+    alternatives: 'Choose products with natural emulsifiers or limit processed foods'
+  },
+  'E500': {
+    code: 'E500',
+    name: 'Sodium Carbonate',
+    category: 'Acidity Regulator / Raising Agent',
+    concern: 'low',
+    description: 'Common baking soda compound used as an acidity regulator. Generally safe in normal amounts.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'Common in baking',
+      'May help with acid reflux in small amounts',
+      'High amounts may cause digestive issues'
+    ],
+    whyAvoid: [
+      'No significant concerns in normal amounts',
+      'High sodium content',
+      'May cause digestive issues in excessive amounts'
+    ],
+    benefits: [
+      'Natural compound',
+      'Common in baking',
+      'Generally safe'
+    ],
+    alternatives: 'No need to avoid - commonly used and generally safe'
+  },
+  'E501': {
+    code: 'E501',
+    name: 'Potassium Carbonate',
+    category: 'Acidity Regulator / Raising Agent',
+    concern: 'low',
+    description: 'Potassium salt used as an acidity regulator. Generally safe and provides potassium.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'Source of potassium',
+      'May help with blood pressure',
+      'Rare digestive issues in high amounts'
+    ],
+    whyAvoid: [
+      'No significant concerns',
+      'May cause digestive issues in excessive amounts',
+      'Should be avoided by those with kidney problems'
+    ],
+    benefits: [
+      'Provides potassium',
+      'Natural compound',
+      'Generally safe'
+    ],
+    alternatives: 'No need to avoid - generally safe additive'
+  },
+  'E635': {
+    code: 'E635',
+    name: 'Disodium 5\'-Ribonucleotides',
+    category: 'Flavor Enhancer',
+    concern: 'moderate',
+    description: 'Flavor enhancer that works synergistically with MSG. May cause reactions in sensitive individuals.',
+    healthEffects: [
+      'May enhance MSG effects',
+      'Can cause headaches in sensitive people',
+      'May trigger migraines',
+      'Potential digestive issues',
+      'May increase appetite'
+    ],
+    whyAvoid: [
+      'May cause adverse reactions',
+      'Often used with MSG (double effect)',
+      'May increase food cravings',
+      'Used to mask low-quality ingredients',
+      'No nutritional value'
+    ],
+    alternatives: 'Choose products with natural flavors or avoid processed foods with flavor enhancers'
+  },
+  // Additional common additives
+  'E100': {
+    code: 'E100',
+    name: 'Curcumin',
+    category: 'Natural Color',
+    concern: 'low',
+    description: 'Natural yellow color from turmeric. Generally safe and may have health benefits.',
+    healthEffects: [
+      'Natural antioxidant',
+      'May have anti-inflammatory properties',
+      'Generally well-tolerated',
+      'Rare allergic reactions'
+    ],
+    whyAvoid: [],
+    benefits: [
+      'Natural colorant',
+      'May have health benefits',
+      'From turmeric'
+    ],
+    alternatives: 'No need to avoid - natural and beneficial'
+  },
+  'E101': {
+    code: 'E101',
+    name: 'Riboflavin (Vitamin B2)',
+    category: 'Natural Color / Vitamin',
+    concern: 'low',
+    description: 'Natural yellow color and essential vitamin. Generally safe and beneficial.',
+    healthEffects: [
+      'Essential vitamin (B2)',
+      'Important for energy metabolism',
+      'Natural colorant',
+      'Generally safe'
+    ],
+    whyAvoid: [],
+    benefits: [
+      'Provides vitamin B2',
+      'Natural colorant',
+      'Essential nutrient'
+    ],
+    alternatives: 'No need to avoid - beneficial vitamin'
+  },
+  'E200': {
+    code: 'E200',
+    name: 'Sorbic Acid',
+    category: 'Preservative',
+    concern: 'low',
+    description: 'Natural preservative derived from berries. Generally safe and effective.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'Natural preservative',
+      'Rare allergic reactions',
+      'Well-tolerated'
+    ],
+    whyAvoid: [
+      'No significant concerns',
+      'Rare skin sensitivity'
+    ],
+    benefits: [
+      'Natural preservative',
+      'Effective and safe',
+      'From natural sources'
+    ],
+    alternatives: 'No need to avoid - natural and safe preservative'
+  },
+  'E202': {
+    code: 'E202',
+    name: 'Potassium Sorbate',
+    category: 'Preservative',
+    concern: 'low',
+    description: 'Potassium salt of sorbic acid. Natural preservative generally considered safe.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'Natural preservative',
+      'Rare allergic reactions',
+      'Well-tolerated'
+    ],
+    whyAvoid: [
+      'No significant concerns',
+      'Rare skin sensitivity'
+    ],
+    benefits: [
+      'Natural preservative',
+      'Effective and safe'
+    ],
+    alternatives: 'No need to avoid - natural and safe'
+  },
+  'E300': {
+    code: 'E300',
+    name: 'Ascorbic Acid (Vitamin C)',
+    category: 'Antioxidant / Vitamin',
+    concern: 'low',
+    description: 'Natural antioxidant and essential vitamin. Beneficial and safe.',
+    healthEffects: [
+      'Essential vitamin (C)',
+      'Powerful antioxidant',
+      'Supports immune system',
+      'Generally safe'
+    ],
+    whyAvoid: [],
+    benefits: [
+      'Provides vitamin C',
+      'Natural antioxidant',
+      'Essential nutrient',
+      'Health benefits'
+    ],
+    alternatives: 'No need to avoid - beneficial vitamin'
+  },
+  'E330': {
+    code: 'E330',
+    name: 'Citric Acid',
+    category: 'Acidity Regulator / Preservative',
+    concern: 'low',
+    description: 'Natural acid from citrus fruits. Common and generally safe.',
+    healthEffects: [
+      'Natural compound',
+      'Generally recognized as safe',
+      'Common in foods',
+      'Rare digestive issues in high amounts'
+    ],
+    whyAvoid: [
+      'No significant concerns',
+      'May cause tooth enamel erosion in excessive amounts'
+    ],
+    benefits: [
+      'Natural acid',
+      'From citrus fruits',
+      'Common and safe'
+    ],
+    alternatives: 'No need to avoid - natural and safe'
+  },
+  'E407': {
+    code: 'E407',
+    name: 'Carrageenan',
+    category: 'Thickener / Stabilizer',
+    concern: 'moderate',
+    description: 'Natural thickener from seaweed. Some concerns about degraded carrageenan.',
+    healthEffects: [
+      'May cause digestive issues in sensitive individuals',
+      'Degraded carrageenan may be concerning',
+      'Potential inflammation concerns',
+      'Generally well-tolerated in food-grade form'
+    ],
+    whyAvoid: [
+      'May cause digestive issues',
+      'Some health concerns',
+      'Better alternatives available'
+    ],
+    alternatives: 'Choose products with natural thickeners like agar or pectin'
+  },
+  'E415': {
+    code: 'E415',
+    name: 'Xanthan Gum',
+    category: 'Thickener / Stabilizer',
+    concern: 'low',
+    description: 'Natural thickener from fermentation. Generally safe and effective.',
+    healthEffects: [
+      'Generally recognized as safe',
+      'May help with blood sugar',
+      'Well-tolerated',
+      'Rare digestive issues'
+    ],
+    whyAvoid: [
+      'No significant concerns',
+      'May cause bloating in sensitive individuals'
+    ],
+    benefits: [
+      'Natural thickener',
+      'Effective and safe',
+      'May have health benefits'
+    ],
+    alternatives: 'No need to avoid - generally safe'
+  },
+  'E471': {
+    code: 'E471',
+    name: 'Mono- and Diglycerides of Fatty Acids',
+    category: 'Emulsifier',
+    concern: 'moderate',
+    description: 'Emulsifiers that may affect gut health. Often from palm oil.',
+    healthEffects: [
+      'May disrupt gut microbiome',
+      'Can affect intestinal barrier',
+      'May increase inflammation',
+      'Often from palm oil (environmental concerns)'
+    ],
+    whyAvoid: [
+      'May affect gut health',
+      'Palm oil concerns',
+      'Better to limit processed foods',
+      'May increase inflammation'
+    ],
+    alternatives: 'Choose products with natural emulsifiers or limit processed foods'
+  },
+  'E950': {
+    code: 'E950',
+    name: 'Acesulfame Potassium',
+    category: 'Artificial Sweetener',
+    concern: 'moderate',
+    description: 'Artificial sweetener that may affect taste and appetite.',
+    healthEffects: [
+      'May affect taste perception',
+      'May increase cravings for sweet foods',
+      'Potential digestive issues',
+      'May affect gut bacteria'
+    ],
+    whyAvoid: [
+      'May increase sweet cravings',
+      'Artificial sweetener',
+      'May affect gut health',
+      'Better alternatives available'
+    ],
+    alternatives: 'Use natural sweeteners or reduce overall sweetness'
+  },
+  'E955': {
+    code: 'E955',
+    name: 'Sucralose',
+    category: 'Artificial Sweetener',
+    concern: 'moderate',
+    description: 'Artificial sweetener made from sugar. May affect gut bacteria and metabolism.',
+    healthEffects: [
+      'May affect gut bacteria',
+      'May affect blood sugar regulation',
+      'Potential digestive issues',
+      'May increase cravings'
+    ],
+    whyAvoid: [
+      'May affect gut microbiome',
+      'May disrupt metabolism',
+      'Artificial sweetener',
+      'Better alternatives available'
+    ],
+    alternatives: 'Use natural sweeteners like stevia or reduce overall sweetness'
   },
 };
 

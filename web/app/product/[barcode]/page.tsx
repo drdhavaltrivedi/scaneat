@@ -373,12 +373,32 @@ export default function ProductDetailPage() {
                                 </div>
                               )}
                               
-                              {/* Alternatives */}
-                              {additiveInfo.alternatives && (
-                                <div className="mt-3 pt-3 border-t border-gray-200">
+                              {/* Benefits */}
+                              {additiveInfo.benefits && additiveInfo.benefits.length > 0 && (
+                                <div className="mb-3">
                                   <h4 className="text-sm font-bold text-green-700 mb-2 flex items-center gap-2">
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    Benefits
+                                  </h4>
+                                  <ul className="space-y-1">
+                                    {additiveInfo.benefits.map((benefit, idx) => (
+                                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                        <span className="text-green-500 mt-1">✓</span>
+                                        <span>{benefit}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {/* Alternatives */}
+                              {additiveInfo.alternatives && (
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <h4 className="text-sm font-bold text-blue-700 mb-2 flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                     Better Alternatives
                                   </h4>
