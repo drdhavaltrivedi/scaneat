@@ -9,8 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../lib/firebase';
+import { fetchProductFromOpenFoodFacts } from '../lib/openFoodFacts';
+import { analyzeProductHealth } from '../lib/healthAnalysis';
 import { Product } from '../../shared/types/product';
 
 export default function ProductDetailScreen() {
@@ -28,22 +28,22 @@ export default function ProductDetailScreen() {
         setLoading(true);
         setError(null);
 
-        // Get product data
-        const getProduct = httpsCallable(functions, 'getProduct');
-        const productResult = await getProduct({ barcode });
-        const productData = productResult.data as any;
+        // Fetch product directly from OpenFoodFacts API
+        const productData = await fetchProductFromOpenFoodFacts(barcode);
+        
+        if (!productData) {
+          throw new Error('Product not found in OpenFoodFacts database.');
+        }
 
-        // Analyze health
-        const analyzeHealth = httpsCallable(functions, 'analyzeHealth');
-        const healthResult = await analyzeHealth({ barcode });
-        const healthScore = healthResult.data as any;
+        // Analyze health directly in the app
+        const healthScore = analyzeProductHealth(productData);
 
         // Combine data
         const fullProduct: Product = {
           ...productData,
           healthScore,
-          createdAt: productData.createdAt?.toDate() || new Date(),
-          updatedAt: productData.updatedAt?.toDate() || new Date(),
+          createdAt: productData.createdAt || new Date(),
+          updatedAt: productData.updatedAt || new Date(),
         };
 
         setProduct(fullProduct);
@@ -196,11 +196,40 @@ export default function ProductDetailScreen() {
       {/* Ingredients */}
       {product.ingredients && product.ingredients.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ingredients</Text>
+          <Text style={styles.sectionTitle}>Ingredients ({product.ingredients.length})</Text>
           {product.ingredients.map((ing, index) => (
             <View key={index} style={styles.ingredientItem}>
-              <Text style={styles.ingredientText}>
-                {ing.rank}. {ing.name}
+              <View style={styles.ingredientHeader}>
+                <View style={styles.ingredientRank}>
+                  <Text style={styles.ingredientRankText}>{ing.rank}</Text>
+                </View>
+                <Text style={styles.ingredientText}>{ing.name}</Text>
+              </View>
+              <View style={styles.ingredientTags}>
+                {ing.vegan && (
+                  <View style={styles.tagVegan}>
+                    <Text style={styles.tagText}>Vegan</Text>
+                  </View>
+                )}
+                {ing.vegetarian && !ing.vegan && (
+                  <View style={styles.tagVegetarian}>
+                    <Text style={styles.tagText}>Vegetarian</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Additives */}
+      {product.additives && product.additives.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: '#F59E0B' }]}>Additives ({product.additives.length})</Text>
+          {product.additives.map((additive, index) => (
+            <View key={index} style={styles.additiveItem}>
+              <Text style={styles.additiveText}>
+                <Text style={styles.additiveCode}>{additive.code}:</Text> {additive.name}
               </Text>
             </View>
           ))}
@@ -213,7 +242,7 @@ export default function ProductDetailScreen() {
           <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>Allergens</Text>
           {product.allergens.map((allergen, index) => (
             <View key={index} style={styles.allergenItem}>
-              <Text style={styles.allergenText}>⚠ {allergen}</Text>
+              <Text style={styles.allergenText}>⚠ {allergen.replace('en:', '').replace(/_/g, ' ')}</Text>
             </View>
           ))}
         </View>
@@ -380,6 +409,63 @@ const styles = StyleSheet.create({
   allergenText: {
     fontSize: 14,
     color: '#991B1B',
+    fontWeight: '600',
+  },
+  ingredientHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  ingredientRank: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#E5E7EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  ingredientRankText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  ingredientTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5,
+  },
+  tagVegan: {
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  tagVegetarian: {
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  tagText: {
+    fontSize: 10,
+    color: '#065F46',
+    fontWeight: '600',
+  },
+  additiveItem: {
+    padding: 12,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#F59E0B',
+  },
+  additiveText: {
+    fontSize: 14,
+    color: '#92400E',
+  },
+  additiveCode: {
+    fontWeight: 'bold',
   },
 });
 

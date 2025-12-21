@@ -1,14 +1,7 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import {
-  calculateNutriScorePoints,
-  getNutriScoreGrade,
-  getHealthConcern,
-  ADDITIVE_CONCERNS,
-  NOVA_DESCRIPTIONS,
-} from '../../shared/utils/healthRules';
-
-const db = admin.firestore();
+/**
+ * Client-side health analysis for mobile
+ * Same logic as web version
+ */
 
 interface HealthReason {
   type: 'positive' | 'negative' | 'warning';
@@ -20,7 +13,7 @@ interface HealthReason {
 /**
  * Analyze product health and generate health score
  */
-function analyzeProductHealth(productData: any): any {
+export function analyzeProductHealth(productData: any): any {
   const reasons: HealthReason[] = [];
   const recommendations: string[] = [];
   const warnings: string[] = [];
@@ -126,43 +119,19 @@ function analyzeProductHealth(productData: any): any {
   // Analyze additives
   if (productData.additives && productData.additives.length > 0) {
     productData.additives.forEach((additive: any) => {
-      const concern = ADDITIVE_CONCERNS[additive.code] || 
-                     ADDITIVE_CONCERNS[additive.code.substring(0, 3)];
-      
-      if (concern) {
-        let impact = 0;
-        switch (concern.concern) {
-          case 'very_high':
-            impact = -8;
-            break;
-          case 'high':
-            impact = -5;
-            break;
-          case 'moderate':
-            impact = -3;
-            break;
-          case 'low':
-            impact = -1;
-            break;
-        }
+      const concern = getAdditiveConcern(additive.code);
+      if (concern === 'high' || concern === 'very_high') {
+        const impact = concern === 'very_high' ? -8 : -5;
         score += impact;
-        reasons.push({
-          type: 'negative',
-          category: 'additives',
-          message: `Contains ${additive.code} (${concern.category})`,
-          impact,
-        });
-        if (concern.concern === 'high' || concern.concern === 'very_high') {
-          warnings.push(`Warning: Contains ${additive.code}`);
-        }
-      } else {
-        score -= 2;
         reasons.push({
           type: 'warning',
           category: 'additives',
-          message: `Contains additive ${additive.code}`,
-          impact: -2,
+          message: `Contains ${additive.code}: ${additive.name}`,
+          impact,
         });
+        if (concern === 'very_high') {
+          warnings.push(`Contains concerning additive: ${additive.code}`);
+        }
       }
     });
   }
@@ -174,7 +143,7 @@ function analyzeProductHealth(productData: any): any {
         reasons.push({
           type: 'positive',
           category: 'processing',
-          message: NOVA_DESCRIPTIONS[1],
+          message: 'Unprocessed or minimally processed food',
           impact: 10,
         });
         break;
@@ -182,7 +151,7 @@ function analyzeProductHealth(productData: any): any {
         reasons.push({
           type: 'positive',
           category: 'processing',
-          message: NOVA_DESCRIPTIONS[2],
+          message: 'Processed culinary ingredients',
           impact: 5,
         });
         break;
@@ -191,7 +160,7 @@ function analyzeProductHealth(productData: any): any {
         reasons.push({
           type: 'warning',
           category: 'processing',
-          message: NOVA_DESCRIPTIONS[3],
+          message: 'Processed food',
           impact: -10,
         });
         break;
@@ -200,7 +169,7 @@ function analyzeProductHealth(productData: any): any {
         reasons.push({
           type: 'negative',
           category: 'processing',
-          message: NOVA_DESCRIPTIONS[4],
+          message: 'Ultra-processed food',
           impact: -20,
         });
         warnings.push('Ultra-processed food');
@@ -225,122 +194,58 @@ function analyzeProductHealth(productData: any): any {
   else if (score >= 35) grade = 'poor';
   else grade = 'avoid';
 
-  // Calculate Nutri-Score if not available
-  let nutriScore = productData.nutriScore;
-  if (!nutriScore && productData.nutrition) {
-    const points = calculateNutriScorePoints(productData.nutrition);
-    nutriScore = getNutriScoreGrade(points);
-  }
-
   return {
     score: Math.max(0, Math.min(100, score)),
     grade,
-    nutriScore,
+    nutriScore: productData.nutriScore,
     novaGroup: productData.novaGroup,
     reasons,
     recommendations,
     warnings,
+    updatedAt: new Date(),
   };
 }
 
 /**
- * Cloud Function to analyze product health
- * HTTP version with CORS support for easier localhost access
+ * Get health concern level for a nutrient
  */
-export const analyzeHealth = functions.https.onRequest(async (req, res) => {
-  // Enable CORS
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
+function getHealthConcern(nutrient: string, value: number): 'low' | 'moderate' | 'high' | 'very_high' {
+  switch (nutrient) {
+    case 'sugar':
+      if (value < 5) return 'low';
+      if (value < 10) return 'moderate';
+      if (value < 20) return 'high';
+      return 'very_high';
+    case 'salt':
+      if (value < 0.3) return 'low';
+      if (value < 1.5) return 'moderate';
+      if (value < 3) return 'high';
+      return 'very_high';
+    case 'saturatedFat':
+      if (value < 5) return 'low';
+      if (value < 10) return 'moderate';
+      if (value < 15) return 'high';
+      return 'very_high';
+    case 'fiber':
+      if (value < 3) return 'very_high'; // Low fiber is bad
+      if (value < 6) return 'high';
+      if (value < 10) return 'moderate';
+      return 'low'; // High fiber is good
+    default:
+      return 'moderate';
   }
+}
 
-  // Get barcode from request body or query
-  const barcode = req.body?.barcode || req.query?.barcode;
-
-  if (!barcode || typeof barcode !== 'string') {
-    res.status(400).json({
-      error: 'invalid-argument',
-      message: 'Barcode is required and must be a string'
-    });
-    return;
-  }
-
-  try {
-    // Get product data
-    const productRef = db.collection('products').doc(barcode);
-    let productDoc;
-    
-    try {
-      productDoc = await productRef.get();
-    } catch (error: any) {
-      functions.logger.error('Firestore read error:', error);
-      res.status(500).json({
-        error: 'internal',
-        message: 'Database connection error. Please try again later.'
-      });
-      return;
-    }
-
-    if (!productDoc.exists) {
-      res.status(404).json({
-        error: 'not-found',
-        message: `Product with barcode ${barcode} not found. Please fetch product first.`
-      });
-      return;
-    }
-
-    const productData = productDoc.data();
-    if (!productData) {
-      res.status(404).json({
-        error: 'not-found',
-        message: 'Product data is empty'
-      });
-      return;
-    }
-
-    // Check if health score already exists and is recent
-    if (productData.healthScore) {
-      const healthScoreAge = Date.now() - (productData.healthScore.updatedAt?.toMillis() || 0);
-      const oneDay = 24 * 60 * 60 * 1000;
-
-      if (healthScoreAge < oneDay) {
-        functions.logger.info(`Returning cached health score for barcode: ${barcode}`);
-        res.status(200).json(productData.healthScore);
-        return;
-      }
-    }
-
-    // Analyze health
-    functions.logger.info(`Analyzing health for barcode: ${barcode}`);
-    const healthScore = analyzeProductHealth(productData);
-
-    // Update product with health score
-    try {
-      await productRef.update({
-        healthScore: {
-          ...healthScore,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    } catch (error: any) {
-      functions.logger.warn('Firestore update error, returning health score without saving:', error);
-      // Return health score even if update fails
-    }
-
-    res.status(200).json(healthScore);
-  } catch (error: any) {
-    functions.logger.error('Error in analyzeHealth:', error);
-    
-    res.status(500).json({
-      error: 'internal',
-      message: error.message || 'An error occurred while analyzing product health'
-    });
-  }
-});
+/**
+ * Get health concern for additives
+ */
+function getAdditiveConcern(code: string): 'low' | 'moderate' | 'high' | 'very_high' {
+  // Common concerning additives
+  const highConcern = ['E102', 'E104', 'E110', 'E122', 'E124', 'E129', 'E211', 'E621'];
+  const veryHighConcern = ['E951', 'E952', 'E954'];
+  
+  if (veryHighConcern.includes(code)) return 'very_high';
+  if (highConcern.includes(code)) return 'high';
+  return 'moderate';
+}
 

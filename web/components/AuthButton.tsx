@@ -27,7 +27,12 @@ export default function AuthButton() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      alert(error.message);
+      // Don't show error if auth is not configured
+      if (error?.code === 'auth/configuration-not-found') {
+        alert('Authentication is not configured. You can use the app without signing in.');
+      } else {
+        alert(error.message || 'Sign in failed. You can use the app without signing in.');
+      }
     } finally {
       setLoading(false);
     }
@@ -46,7 +51,12 @@ export default function AuthButton() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      alert(error.message);
+      // Don't show error if auth is not configured
+      if (error?.code === 'auth/configuration-not-found') {
+        alert('Authentication is not configured. You can use the app without signing in.');
+      } else {
+        alert(error.message || 'Sign up failed. You can use the app without signing in.');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,9 +73,18 @@ export default function AuthButton() {
   const handleAnonymousSignIn = async () => {
     setLoading(true);
     try {
-      await signInAnonymously(auth);
+      // Try anonymous sign-in, but don't show error if it fails
+      // Authentication is optional since we use direct API calls
+      await signInAnonymously(auth).catch((err: any) => {
+        // If anonymous auth is not enabled, that's okay - we don't need it
+        console.info('Anonymous authentication not available. Continuing without authentication.');
+        // Don't show error to user - app works without auth
+      });
     } catch (error: any) {
-      alert(error.message);
+      // Only show error if it's not a configuration error
+      if (error?.code !== 'auth/configuration-not-found') {
+        console.warn('Auth error:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -90,20 +109,38 @@ export default function AuthButton() {
   return (
     <div className="bg-white rounded-lg shadow-md p-4 max-w-md mx-auto">
       <div className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label htmlFor="auth-email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            id="auth-email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Email address"
+          />
+        </div>
+        <div>
+          <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <input
+            id="auth-password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete={isSignUp ? 'new-password' : 'current-password'}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Password"
+          />
+        </div>
         <button
           onClick={isSignUp ? handleSignUp : handleSignIn}
           disabled={loading}
@@ -130,8 +167,11 @@ export default function AuthButton() {
           disabled={loading}
           className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
         >
-          Continue as Guest
+          {loading ? 'Loading...' : 'Continue as Guest'}
         </button>
+        <p className="text-xs text-gray-500 text-center mt-2">
+          Note: Authentication is optional. You can use the app without signing in.
+        </p>
       </div>
     </div>
   );

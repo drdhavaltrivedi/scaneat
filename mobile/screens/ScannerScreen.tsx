@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../lib/firebase';
+import { fetchProductFromOpenFoodFacts } from '../lib/openFoodFacts';
 import BarcodeScanner from '../components/BarcodeScanner';
 
 export default function ScannerScreen() {
@@ -13,9 +12,12 @@ export default function ScannerScreen() {
     setLoading(true);
 
     try {
-      // Call cloud function to get product
-      const getProduct = httpsCallable(functions, 'getProduct');
-      const result = await getProduct({ barcode });
+      // Fetch product directly from OpenFoodFacts API
+      const productData = await fetchProductFromOpenFoodFacts(barcode);
+
+      if (!productData) {
+        throw new Error('Product not found in OpenFoodFacts database.');
+      }
 
       // Navigate to product detail
       navigation.navigate('ProductDetail' as never, { barcode } as never);

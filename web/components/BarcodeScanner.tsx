@@ -82,9 +82,9 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Scan Barcode</h2>
+    <div className="w-full max-w-2xl mx-auto p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Scan Barcode</h2>
         
         {/* Camera Scanner */}
         <div className="mb-6">
@@ -120,14 +120,14 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
             {!isScanning ? (
               <button
                 onClick={startScanning}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors font-semibold text-base sm:text-lg"
               >
                 Start Scanning
               </button>
             ) : (
               <button
                 onClick={stopScanning}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 active:bg-red-800 transition-colors font-semibold text-base sm:text-lg"
               >
                 Stop Scanning
               </button>
@@ -147,21 +147,39 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
 
         {/* Manual Entry */}
         <div>
-          <form onSubmit={handleManualSubmit} className="flex gap-2">
+          <label 
+            htmlFor="barcode-input"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Enter Barcode Manually
+          </label>
+          <form onSubmit={handleManualSubmit} className="flex flex-col sm:flex-row gap-2">
             <input
+              id="barcode-input"
+              name="barcode"
               type="text"
               value={manualBarcode}
               onChange={(e) => setManualBarcode(e.target.value)}
-              placeholder="Enter barcode manually"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter barcode (e.g., 8901058851298)"
+              autoComplete="off"
+              inputMode="numeric"
+              className="flex-1 px-3 sm:px-4 py-3 text-base sm:text-lg font-mono border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 w-full"
+              style={{ fontSize: '16px', letterSpacing: '0.5px' }}
+              aria-label="Barcode input field"
             />
             <button
               type="submit"
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              className="bg-green-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors font-semibold text-base sm:text-lg whitespace-nowrap w-full sm:w-auto"
+              aria-label="Search for product by barcode"
             >
               Search
             </button>
           </form>
+          {manualBarcode && (
+            <p className="mt-2 text-sm text-gray-600 font-mono" role="status" aria-live="polite">
+              Barcode: <span className="font-bold text-gray-900">{manualBarcode}</span>
+            </p>
+          )}
         </div>
       </div>
     </div>

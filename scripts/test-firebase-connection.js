@@ -5,11 +5,14 @@
  * Run: node scripts/test-firebase-connection.js
  */
 
-const admin = require('firebase-admin');
+const path = require('path');
+const admin = require(path.join(__dirname, '../functions/node_modules/firebase-admin'));
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin with service account
 try {
+  const serviceAccount = require('/home/brilworks/.firebase-mcp/serviceAccountKey.json');
   admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
     projectId: 'scaneat-bc079',
   });
   console.log('✅ Firebase Admin initialized');

@@ -75,15 +75,30 @@ function parseProduct(offProduct: OpenFoodFactsProduct, barcode: string): any {
 /**
  * Cloud Function to get product by barcode
  * Checks cache first, then fetches from OpenFoodFacts if needed
+ * 
+ * HTTP version with CORS support for easier localhost access
  */
-export const getProduct = functions.https.onCall(async (request) => {
-  const { barcode } = request.data;
+export const getProduct = functions.https.onRequest(async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  // Get barcode from request body or query
+  const barcode = req.body?.barcode || req.query?.barcode;
 
   if (!barcode || typeof barcode !== 'string') {
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      'Barcode is required and must be a string'
-    );
+    res.status(400).json({
+      error: 'invalid-argument',
+      message: 'Barcode is required and must be a string'
+    });
+    return;
   }
 
   try {
@@ -110,7 +125,8 @@ export const getProduct = functions.https.onCall(async (request) => {
 
       if (cacheAge < sevenDays) {
         functions.logger.info(`Returning cached product for barcode: ${barcode}`);
-        return productData;
+        res.status(200).json(productData);
+        return;
       }
     }
 
@@ -119,10 +135,11 @@ export const getProduct = functions.https.onCall(async (request) => {
     const offProduct = await fetchProductFromOpenFoodFacts(barcode);
 
     if (!offProduct) {
-      throw new functions.https.HttpsError(
-        'not-found',
-        `Product with barcode ${barcode} not found in OpenFoodFacts`
-      );
+      res.status(404).json({
+        error: 'not-found',
+        message: `Product with barcode ${barcode} not found in OpenFoodFacts`
+      });
+      return;
     }
 
     // Parse and save to Firestore
@@ -135,19 +152,14 @@ export const getProduct = functions.https.onCall(async (request) => {
     }
 
     functions.logger.info(`Product saved to cache: ${barcode}`);
-    return productData;
+    res.status(200).json(productData);
   } catch (error: any) {
     functions.logger.error('Error in getProduct:', error);
     
-    if (error instanceof functions.https.HttpsError) {
-      throw error;
-    }
-    
-    throw new functions.https.HttpsError(
-      'internal',
-      'An error occurred while fetching the product',
-      error.message
-    );
+    res.status(500).json({
+      error: 'internal',
+      message: error.message || 'An error occurred while fetching the product'
+    });
   }
 });
 
