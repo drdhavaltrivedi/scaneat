@@ -13,10 +13,12 @@ Your code has been pushed to GitHub and is ready to deploy to Vercel!
    - Select "Import Git Repository"
    - Choose your GitHub repository: `drdhavaltrivedi/scaneat`
 4. **Configure Project**:
-   - **Root Directory**: Set to `web` (this is already configured in `vercel.json`)
+   - **Root Directory**: Set to `web` (IMPORTANT: Set this in Vercel dashboard, not in vercel.json)
    - **Framework Preset**: Next.js (should auto-detect)
-   - **Build Command**: `npm run build` (already configured)
-   - **Output Directory**: `.next` (already configured)
+   - **Build Command**: `npm run build` (already configured in vercel.json)
+   - **Output Directory**: `.next` (already configured in vercel.json)
+   
+   **Note**: The `rootDirectory` must be set in the Vercel dashboard under Project Settings → General → Root Directory. Set it to `web`. The vercel.json file cannot contain `rootDirectory` as it's not a valid property.
 5. **Environment Variables** (if needed):
    - Add any Firebase or API keys if required
 6. **Deploy**: Click "Deploy"
