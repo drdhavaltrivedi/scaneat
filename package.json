@@ -5,6 +5,9 @@
   "scripts": {
     "build": "cd web && npm install && npm run build",
     "install": "cd web && npm install"
+  },
+  "devDependencies": {
+    "next": "16.1.0"
   }
 }
 
