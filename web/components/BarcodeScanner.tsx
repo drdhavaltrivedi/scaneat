@@ -20,8 +20,13 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
   useEffect(() => {
     // Check if we're on HTTPS (required for camera access)
     if (typeof window !== 'undefined') {
-      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-      if (!isSecure) {
+      const hostname = window.location.hostname;
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+      const isLocalNetwork = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(hostname);
+      const isSecure = window.location.protocol === 'https:' || isLocalhost;
+      
+      // Only show error for non-local, non-HTTPS connections
+      if (!isSecure && !isLocalNetwork) {
         setPermissionError('Camera access requires HTTPS. Please access this site over a secure connection.');
         setPermissionStatus('denied');
       }
@@ -49,10 +54,22 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
       setPermissionError(null);
       setPermissionStatus('checking');
       
-      // Check if we're on HTTPS (required for camera access)
-      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-      if (!isSecure) {
+      // Check if we're on HTTPS or localhost (required for camera access)
+      // Allow localhost, 127.0.0.1, and local network IPs for development
+      const hostname = window.location.hostname;
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+      const isLocalNetwork = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(hostname);
+      const isSecure = window.location.protocol === 'https:' || isLocalhost;
+      
+      // For local network IPs, try anyway (some browsers may allow it)
+      // But warn if it's not HTTPS
+      if (!isSecure && !isLocalNetwork) {
         throw new Error('HTTPS_REQUIRED');
+      }
+      
+      // Warn but don't block for local network without HTTPS
+      if (isLocalNetwork && window.location.protocol !== 'https:') {
+        console.warn('Camera access may not work over HTTP on mobile devices. Use HTTPS or access via localhost.');
       }
 
       // Check if mediaDevices API is available
@@ -82,7 +99,14 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
       
       if (error.message === 'HTTPS_REQUIRED') {
         setPermissionStatus('denied');
-        setPermissionError('Camera access requires a secure connection (HTTPS). Please access this site over HTTPS.');
+        const hostname = window.location.hostname;
+        const isLocalNetwork = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(hostname);
+        
+        if (isLocalNetwork) {
+          setPermissionError('Camera access requires HTTPS on mobile devices. For local development, try accessing via localhost on your computer, or set up HTTPS for your local server.');
+        } else {
+          setPermissionError('Camera access requires a secure connection (HTTPS). Please access this site over HTTPS.');
+        }
         if (onError) {
           onError(new Error('HTTPS required for camera access.'));
         }
