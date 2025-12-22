@@ -16,7 +16,8 @@ export function getErrorMessage(error: any): string {
   
   // Handle empty object errors
   if (typeof error === 'object' && Object.keys(error).length === 0) {
-    return 'An unexpected error occurred. Please check your connection and try again.';
+    console.error('Empty error object received. This may indicate a network or API issue.');
+    return 'An unexpected error occurred. Please check your internet connection and try again. If the problem persists, the OpenFoodFacts API may be temporarily unavailable.';
   }
   
   // Handle Firebase Functions errors

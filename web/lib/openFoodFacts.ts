@@ -46,30 +46,69 @@ export interface OpenFoodFactsProduct {
  */
 export async function fetchProductFromOpenFoodFacts(barcode: string): Promise<any> {
   try {
-    const response = await fetch(
-      `${OPENFOODFACTS_API_URL}/product/${barcode}.json`,
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      }
-    );
+    console.log(`[OpenFoodFacts] Fetching product for barcode: ${barcode}`);
+    const url = `${OPENFOODFACTS_API_URL}/product/${barcode}.json`;
+    console.log(`[OpenFoodFacts] URL: ${url}`);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Scaneat/1.0 (https://github.com/drdhavaltrivedi/scaneat)',
+      },
+    });
+
+    console.log(`[OpenFoodFacts] Response status: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const errorText = await response.text().catch(() => 'Unable to read error response');
+      console.error(`[OpenFoodFacts] HTTP Error ${response.status}:`, errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText.substring(0, 100)}`);
     }
 
     const data: OpenFoodFactsProduct = await response.json();
+    console.log(`[OpenFoodFacts] Response data status: ${data.status}`, data.product ? 'Product found' : 'No product');
     
     if (data.status === 1 && data.product) {
-      return parseProduct(data, barcode);
+      const parsed = parseProduct(data, barcode);
+      console.log(`[OpenFoodFacts] Product parsed successfully:`, parsed.name);
+      return parsed;
     }
     
+    if (data.status === 0) {
+      console.log(`[OpenFoodFacts] Product not found in database`);
+      throw new Error('Product not found in OpenFoodFacts database.');
+    }
+    
+    console.warn(`[OpenFoodFacts] Unexpected status: ${data.status}`);
     return null;
   } catch (error: any) {
-    console.error('Error fetching from OpenFoodFacts:', error);
-    throw new Error(`Failed to fetch product: ${error.message}`);
+    console.error('[OpenFoodFacts] Error details:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+      barcode,
+    });
+    
+    // Provide more specific error messages
+    if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+      throw new Error('Network error: Unable to connect to OpenFoodFacts. Please check your internet connection.');
+    }
+    
+    if (error?.message?.includes('CORS')) {
+      throw new Error('CORS error: The API is blocking requests. This may be a temporary issue.');
+    }
+    
+    if (error?.message?.includes('timeout')) {
+      throw new Error('Request timed out. The OpenFoodFacts API may be slow. Please try again.');
+    }
+    
+    // Re-throw with original message if it's already descriptive
+    if (error?.message && !error.message.includes('Failed to fetch product')) {
+      throw error;
+    }
+    
+    throw new Error(`Failed to fetch product: ${error?.message || 'Unknown error occurred'}`);
   }
 }
 
